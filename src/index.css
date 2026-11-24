@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.75rem;
+  --background: oklch(0.98 0.01 280);
+  --foreground: oklch(0.2 0.03 270);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.45 0.2 265);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.02 265);
-  --secondary-foreground: oklch(0.3 0.1 265);
-  --muted-foreground: oklch(0.556 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.6 0.15 265);
+  --card-foreground: oklch(0.2 0.03 270);
+  --primary: oklch(0.55 0.22 275);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.03 280);
+  --secondary-foreground: oklch(0.35 0.12 275);
+  --muted-foreground: oklch(0.55 0.02 270);
+  --destructive: oklch(0.6 0.22 25);
+  --border: oklch(0.92 0.01 280);
+  --input: oklch(0.9 0.02 280);
+  --ring: oklch(0.65 0.18 275);
 }
 
 @theme inline {
@@ -38,5 +38,10 @@
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  body {
+    @apply text-foreground;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf2f8 100%);
+    background-attachment: fixed;
+  }
 }
