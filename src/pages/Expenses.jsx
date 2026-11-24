@@ -3,9 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
-const CATEGORIES = ["Food", "Transport", "Study", "Other"];
+const CATEGORIES = {
+  Food: { emoji: "🍔", color: "bg-orange-100 text-orange-700" },
+  Transport: { emoji: "🚌", color: "bg-sky-100 text-sky-700" },
+  Study: { emoji: "📚", color: "bg-violet-100 text-violet-700" },
+  Other: { emoji: "🧾", color: "bg-slate-100 text-slate-700" },
+};
+const NAMES = Object.keys(CATEGORIES);
 
 export default function Expenses() {
   const navigate = useNavigate();
@@ -13,7 +18,7 @@ export default function Expenses() {
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState(NAMES[0]);
   const [expenses, setExpenses] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("expenses")) || [];
@@ -39,7 +44,10 @@ export default function Expenses() {
     e.preventDefault();
     const value = parseFloat(amount);
     if (!title.trim() || isNaN(value) || value <= 0) return;
-    setExpenses([...expenses, { id: Date.now(), title: title.trim(), amount: value, category }]);
+    setExpenses([
+      { id: Date.now(), title: title.trim(), amount: value, category },
+      ...expenses,
+    ]);
     setTitle("");
     setAmount("");
   }
@@ -49,55 +57,69 @@ export default function Expenses() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>{name}'s Expenses</CardTitle>
-          <CardDescription>Total spent: ${total.toFixed(2)}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={addExpense} className="space-y-2">
-            <Input placeholder="What did you buy?" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <div className="flex gap-2">
-              <Input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="h-9 rounded-md border border-input bg-card px-2 text-sm"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <Button type="submit" className="w-full">Add Expense</Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-lg space-y-4 p-4 pb-10">
+      <div className="flex items-center justify-between pt-2">
+        <h1 className="text-xl font-bold">Hi, {name} 👋</h1>
+        <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+          Switch user
+        </Button>
+      </div>
+
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 p-6 text-white shadow-lg">
+        <p className="text-sm opacity-80">Total spent</p>
+        <p className="text-4xl font-bold tracking-tight">${total.toFixed(2)}</p>
+        <p className="mt-1 text-sm opacity-80">{expenses.length} expenses</p>
+      </div>
+
+      <form onSubmit={addExpense} className="space-y-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <Input placeholder="What did you buy?" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <div className="flex gap-2">
+          <Input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="h-9 rounded-md border border-input bg-card px-2 text-sm"
+          >
+            {NAMES.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORIES[c].emoji} {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <Button type="submit" className="w-full">+ Add Expense</Button>
+      </form>
 
       <div className="space-y-2">
         {expenses.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground">No expenses yet.</p>
+          <div className="rounded-2xl border border-dashed bg-white/60 p-8 text-center text-sm text-muted-foreground">
+            <p className="mb-1 text-3xl">🪙</p>
+            No expenses yet. Add your first one above.
+          </div>
         )}
-        {expenses.map((x) => (
-          <Card key={x.id}>
-            <CardContent className="flex items-center justify-between gap-2 p-4">
-              <div className="space-y-1">
-                <p className="font-medium">{x.title}</p>
-                <Badge>{x.category}</Badge>
+        {expenses.map((x) => {
+          const cat = CATEGORIES[x.category] || CATEGORIES.Other;
+          return (
+            <div key={x.id} className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-black/5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-xl">
+                {cat.emoji}
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-semibold">${x.amount.toFixed(2)}</span>
-                <Button variant="destructive" size="sm" onClick={() => removeExpense(x.id)}>
-                  Delete
-                </Button>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{x.title}</p>
+                <Badge className={cat.color}>{x.category}</Badge>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              <span className="font-semibold">${x.amount.toFixed(2)}</span>
+              <button
+                onClick={() => removeExpense(x.id)}
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:bg-red-50 hover:text-destructive"
+                aria-label="Delete expense"
+              >
+                ✕
+              </button>
+            </div>
+          );
+        })}
       </div>
-
-      <Button variant="outline" onClick={() => navigate("/")}>← Back</Button>
     </div>
   );
 }
